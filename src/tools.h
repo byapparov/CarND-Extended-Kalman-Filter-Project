@@ -26,6 +26,16 @@ class Tools {
    * A helper method to calculate Jacobians.
    */
   Eigen::MatrixXd CalculateJacobian(const Eigen::VectorXd& x_state);
+  
+  /**
+   * A helper method to convert cartesian to polar coordinates
+   */
+  Eigen::VectorXd PolarCoordinates(const Eigen::VectorXd &x);
+  
+  /**
+   * A helper method to correct polar coordinaetes
+   */
+  Eigen::VectorXd ConformPolarPosition(const Eigen::VectorXd &z);
 
 };
 

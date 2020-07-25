@@ -86,10 +86,41 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    Hj(1,3) = 0;
    
    // p_speed
-   Hj(2,0) = py * (vx * py - vy * px) / pow(l_2, 3/2);
-   Hj(2,1) = px * (vy * px - vx * py) / pow(l_2, 3/2);
+   Hj(2,0) = py * (vx * py - vy * px) / pow(l, 3);
+   Hj(2,1) = px * (vy * px - vx * py) / pow(l, 3);
    Hj(2,2) = px / l;
    Hj(2,3) = py / l;
    
    return Hj;
+}
+
+/**
+ * Calculates position in polar coordinates
+ * @param x estimate of the position
+ */
+VectorXd Tools::PolarCoordinates(const Eigen::VectorXd &x) {
+   float l = sqrt(pow(x[0], 2) + pow(x[1], 2));
+   VectorXd z = VectorXd(3);
+   z << l,
+       atan2(x[1], x[0]), 
+       (x[0] * x[2] + x[1] * x[3]) / l;
+   return z;
+}
+
+/**
+ * Adjusts angle of the position to be within -pi to pi
+ * @param z polar coordinates position
+ */
+VectorXd Tools::ConformPolarPosition(const Eigen::VectorXd &z) {
+   float angle = z[1];
+   if (angle > M_PI || angle < -M_PI) {
+      // adjust the angle to the (-pi, pi) range expected 
+      // by the calculation in the Kalman Filter
+      angle = atan2(sin(angle), cos(angle));
+      VectorXd res = VectorXd(3);
+      res << z[0], angle, z[2];
+      return res;
+   } else {
+      return z;
+   }
 }

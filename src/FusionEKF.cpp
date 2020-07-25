@@ -24,7 +24,6 @@ FusionEKF::FusionEKF() {
               0, 1, 0, 0;
   
   ekf_.H_ = H_laser_;
-  Hj_ = MatrixXd(3, 4);
 
   
   // Laser measurement covariance matrix
@@ -92,8 +91,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       float angle = radar_state[1];
       float l_velocity = radar_state[2];
       
-      cout << "angle :" << angle << "; + l :" << l << " -> x =" << cos(angle) * l << endl;
-      
       ekf_.x_ << cos(angle) * l,
                  sin(angle) * l,
                  cos(angle) * l_velocity,
@@ -106,9 +103,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  measurement_pack.raw_measurements_[1],
                  0,
                  0;
-      
-      cout << "x :" << ekf_.x_ << endl;
-    }
+     }
 
     // done initializing, no need to predict or update
     previous_timestamp_ = measurement_pack.timestamp_;
@@ -152,9 +147,12 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
+    ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
     // Laser update
+    ekf_.H_ = H_laser_;
+    ekf_.R_ = R_laser_;
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
