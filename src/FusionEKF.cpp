@@ -30,22 +30,14 @@ FusionEKF::FusionEKF() {
   R_laser_ = MatrixXd(2, 2);
   R_laser_ << 0.0225, 0,
               0,      0.0225;
-  
-  ekf_.R_ = R_laser_;
 
   // Radar measurement covariance matrix 
   R_radar_ = MatrixXd(3, 3);
   R_radar_ << 0.09, 0,      0,
               0,    0.0009, 0,
               0,    0,      0.09;
-  
-  ekf_.R_radar_ = R_radar_;
-  /**
-   * TODO: Finish initializing the FusionEKF.
-  */
-  
+ 
   ekf_.F_ = MatrixXd(4,4);
-  
   ekf_.Q_ = MatrixXd(4,4);
   
   // state covariance matrix P
@@ -54,10 +46,6 @@ FusionEKF::FusionEKF() {
              0, 1, 0, 0,
              0, 0, 1000, 0,
              0, 0, 0, 1000;
-  
-  /**
-   * TODO: Set the process and measurement noises
-  */
 
 }
 
@@ -97,8 +85,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
                  sin(angle) * l_velocity;
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
-      
-      
       ekf_.x_ << measurement_pack.raw_measurements_[0],
                  measurement_pack.raw_measurements_[1],
                  0,
@@ -114,7 +100,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
    * Prediction
    */
-  
   // compute the time elapsed between the current and previous measurements
   // dt - expressed in seconds
   float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;
@@ -144,15 +129,15 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
    * Update the state and covariance matrices using the senser data.
    */
-
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
     // Radar updates
     ekf_.R_ = R_radar_;
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
   } else {
     // Laser update
-    ekf_.H_ = H_laser_;
     ekf_.R_ = R_laser_;
+    // H is updated here in case a common flow to be used for udpate
+    ekf_.H_ = H_laser_; 
     ekf_.Update(measurement_pack.raw_measurements_);
   }
 
